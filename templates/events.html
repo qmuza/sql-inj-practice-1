@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block main %}
+    {% for event in eventlist %}
+        <div>
+            <h3>{{ event.name }}</h3>
+            <h5>{{ event.time }}</h5>
+            <p>{{ event.desc }}</p>
+            <span>Kuota: {{ event.capacity }}, </span>
+            <span>Terisi: {{ event.registered }}, </span>
+            <span>Tersedia: {{ event.capacity - event.registered }}.</span>
+            <br><br><br>
+        </div>  
+    {% endfor %}
+{% endblock %}
