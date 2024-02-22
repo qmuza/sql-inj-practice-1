@@ -16,11 +16,19 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String)
 
 class Events(db.Model):
-    name = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
     desc = db.Column(db.String)
-    time = db.Column(db.DateTime)
+    time = db.Column(db.Date)
     capacity = db.Column(db.Integer)
     registered = db.Column(db.Integer)
+
+class Participations(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    user = db.relationship('Users')
+    event = db.relationship('Events')
 
 with app.app_context():
     db.create_all()
