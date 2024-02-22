@@ -65,6 +65,12 @@ def register():
             return redirect(url_for('home'))
 
     return render_template("/register.html", user=current_user)
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    flash('Succesfully logged out!')
+    return redirect(url_for('register'))
     
 if __name__ == '__main__':
     app.run(debug=True)
