@@ -66,11 +66,31 @@ def register():
 
     return render_template("/register.html", user=current_user)
 
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        uname = Users.query.filter_by(username=username).first()
+
+        if uname:
+            if check_password_hash(uname.password, password):
+                login_user(uname, remember="True")
+                flash('Succesfully logged in!')
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect password')
+        else:
+            flash('User not found')
+
+    return render_template("/login.html", user=current_user)
+
 @app.route("/logout")
 def logout():
     logout_user()
     flash('Succesfully logged out!')
-    return redirect(url_for('register'))
+    return redirect(url_for('login'))
     
 if __name__ == '__main__':
     app.run(debug=True)
