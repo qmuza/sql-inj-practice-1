@@ -9,6 +9,15 @@
             <span>Kuota: {{ event.capacity }}, </span>
             <span>Terisi: {{ event.registered }}, </span>
             <span>Tersedia: {{ event.capacity - event.registered }}.</span>
+            {% if user in event.users %}
+            <span>Registered</span>
+            {% else %}
+            <span>Not Registered</span>
+            {% endif %}
+            <form action="/participate" method="post">
+            <input type="hidden" name="id" value="{{ event.id }}">
+            <button class="btn btn-primary" type="submit">Register</button>
+            </form>
             <br><br><br>
         </div>  
     {% endfor %}

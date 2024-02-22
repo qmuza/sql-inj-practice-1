@@ -8,6 +8,9 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = 'gwgatausecretkeybuatapa'
+#oiya tau ga, aku baru paham cara exclude pas ngeadd di tengah2 project
+#sebelumnya aku selalu pake git add .
+#makanya di commit2 awal ada beberapa file ga penting ikut masuk
 
 db = SQLAlchemy(app)
 
@@ -15,6 +18,7 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True)
     password = db.Column(db.String)
+    events = db.relationship('Events', secondary="participations", back_populates="users")
 
 class Events(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,13 +27,12 @@ class Events(db.Model):
     time = db.Column(db.DateTime)
     capacity = db.Column(db.Integer)
     registered = db.Column(db.Integer, default=0)
+    users = db.relationship('Users', secondary="participations", back_populates="events")
 
 class Participations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
-    user = db.relationship('Users')
-    event = db.relationship('Events')
 
 with app.app_context():
     db.create_all()
@@ -120,6 +123,19 @@ def events():
     if request.method == 'POST':
         pass; #route ini sekarang baru buat display semua event, belom ada yang pake POST
     return render_template("/events.html", user=current_user, eventlist=Events.query.all())
-    
+
+@app.route("/participate", methods=['POST'])
+def participate():
+    evid = request.form.get('id')
+    if not evid:
+        flash('problem')
+        return redirect(url_for('home'))
+    part = Participations(user_id=current_user.id, event_id=int(evid))
+    Events.query.filter_by(id=int(evid)).first().registered += 1
+    db.session.add(part)
+    db.session.commit()
+    flash('Event succesfully registered!')
+    return redirect(url_for('home'))
+
 if __name__ == '__main__':
     app.run(debug=True)
