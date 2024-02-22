@@ -128,13 +128,26 @@ def events():
 def participate():
     evid = request.form.get('id')
     if not evid:
-        flash('problem')
+        flash('There\'s a problem with selecting that event')
         return redirect(url_for('home'))
     part = Participations(user_id=current_user.id, event_id=int(evid))
     Events.query.filter_by(id=int(evid)).first().registered += 1
     db.session.add(part)
     db.session.commit()
     flash('Event succesfully registered!')
+    return redirect(url_for('home'))
+
+@app.route("/cancel", methods=['POST'])
+def cancel():
+    evid = request.form.get('id')
+    if not evid:
+        flash('There\'s a problem with selecting that event')
+        return redirect(url_for('home'))
+    Events.query.filter_by(id=int(evid)).first().registered -= 1
+    part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
+    db.session.delete(part)
+    db.session.commit()
+    flash('Event succesfully cancelled!')
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
