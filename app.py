@@ -46,6 +46,7 @@ def load_user(id):
     return Users.query.get(int(id))
 
 @app.route("/")
+@login_required
 def home():
     if not Events.query.all():
         #kalau belom ada event apa2, tambahin bbrp event custom
@@ -73,21 +74,21 @@ def register():
         uname = Users.query.filter_by(username=username).first()
 
         if uname:
-            flash('Username already registered!')
+            flash('Username already registered!', category='danger')
         elif len(username) < 1:
-            flash('Must enter username!')
+            flash('Must enter username!', category='danger')
         elif len(password) < 1:
-            flash('Must enter password!')
+            flash('Must enter password!', category='danger')
         elif len(confirmation) < 1:
-            flash('Must confirm password.')
+            flash('Must confirm password.', category='danger')
         elif password != confirmation:
-            flash('Password confirmation must match.')
+            flash('Password confirmation must match.', category='danger')
         else:
             registree = Users(username=username, password=generate_password_hash(password))
             db.session.add(registree)
             db.session.commit()
             login_user(registree, remember="True")
-            flash('Succesfully registered!')
+            flash('Succesfully registered!', category='success')
             return redirect(url_for('home'))
 
     return render_template("/register.html", user=current_user)
@@ -103,51 +104,54 @@ def login():
         if uname:
             if check_password_hash(uname.password, password):
                 login_user(uname, remember="True")
-                flash('Succesfully logged in!')
-                return redirect(url_for('home'))
+                flash('Succesfully logged in!', category='success')
             else:
-                flash('Incorrect password')
+                flash('Incorrect password', category='danger')
         else:
-            flash('User not found')
+            flash('User not found', category='danger')
 
     return render_template("/login.html", user=current_user)
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
-    flash('Succesfully logged out!')
+    flash('Succesfully logged out!', category='info')
     return redirect(url_for('login'))
 
 @app.route("/events", methods=['GET', 'POST'])
+@login_required
 def events():
     if request.method == 'POST':
         pass; #route ini sekarang baru buat display semua event, belom ada yang pake POST
     return render_template("/events.html", user=current_user, eventlist=Events.query.all())
 
 @app.route("/participate", methods=['POST'])
+@login_required
 def participate():
     evid = request.form.get('id')
     if not evid:
-        flash('There\'s a problem with selecting that event')
+        flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
     part = Participations(user_id=current_user.id, event_id=int(evid))
     Events.query.filter_by(id=int(evid)).first().registered += 1
     db.session.add(part)
     db.session.commit()
-    flash('Event succesfully registered!')
+    flash('Event succesfully registered!', category='info')
     return redirect(url_for('home'))
 
 @app.route("/cancel", methods=['POST'])
+@login_required
 def cancel():
     evid = request.form.get('id')
     if not evid:
-        flash('There\'s a problem with selecting that event')
+        flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
     Events.query.filter_by(id=int(evid)).first().registered -= 1
     part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
     db.session.delete(part)
     db.session.commit()
-    flash('Event succesfully cancelled!')
+    flash('Event succesfully cancelled!', category='info')
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
