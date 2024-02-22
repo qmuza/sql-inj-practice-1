@@ -35,7 +35,36 @@ def load_user(id):
 
 @app.route("/")
 def home():
-    return render_template("/home.html")
+    return render_template("/home.html", user=current_user)
 
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+        confirmation = request.form.get('confirmation')
+
+        uname = Users.query.filter_by(username=username).first()
+
+        if uname:
+            flash('Username already registered!')
+        elif len(username) < 1:
+            flash('Must enter username!')
+        elif len(password) < 1:
+            flash('Must enter password!')
+        elif len(confirmation) < 1:
+            flash('Must confirm password.')
+        elif password != confirmation:
+            flash('Password confirmation must match.')
+        else:
+            registree = Users(username=username, password=generate_password_hash(password))
+            db.session.add(registree)
+            db.session.commit()
+            login_user(registree, remember="True")
+            flash('Succesfully registered!')
+            return redirect(url_for('home'))
+
+    return render_template("/register.html", user=current_user)
+    
 if __name__ == '__main__':
     app.run(debug=True)
