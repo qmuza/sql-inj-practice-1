@@ -6,11 +6,22 @@
             <h3>{{ event.name }}</h3>
             <h5>{{ event.time }}</h5>
             <p>{{ event.desc }}</p>
-            <span>Kuota: {{ event.capacity }}, </span>
-            <span>Terisi: {{ event.registered }}, </span>
-            <span>Tersedia: {{ event.capacity - event.registered }}.</span>
+            <span>Capacity: {{ event.capacity }}, </span>
+            <span>Booked: {{ event.registered }}, </span>
+            <span>Available: {{ event.capacity - event.registered }}.</span>
             <br><br>
             {% if user in event.users %}
+            {% for p in plist %}
+            {% if p.event_id == event.id %}
+            <form action="/update" method="post">
+                <input type="hidden" name="id" value="{{ event.id }}">
+                <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered + p.quant }}">
+                <br>
+                <button class="btn btn-primary" type="submit">Change number booked</button>
+            </form>
+            {% endif %}
+            {% endfor %}
+            <br>
             <form action="/cancel" method="post">
                 <input type="hidden" name="id" value="{{ event.id }}">
                 <button class="btn btn-primary" type="submit">Cancel Event</button>
@@ -18,8 +29,7 @@
             {% else %}
             <form action="/participate" method="post">
                 <input type="hidden" name="id" value="{{ event.id }}">
-                <label for="quant">Select number of slots to register: </label><br><br>
-                <input class="form-control mx-auto w-auto" type="number" id="quant" name="quant" min="1" max="{{ event.capacity - event.registered }}">
+                <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered }}">
                 <br>
                 <button class="btn btn-primary" type="submit">Register Event</button>
             </form>

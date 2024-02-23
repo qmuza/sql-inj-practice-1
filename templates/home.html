@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 
 {% block main %}
-    Hello World
-    {% for p in user.events %}
-    <span>{{ user.id }}</span>
-    <span>{{ p.id }}</span>
+    <h4>Hello, {{ user.username }}.</h4>
+    {% if user.events %}
+    <span>Registered events: </span><br>
+    {% for ev in user.events %}
+    <span>{{ ev.name }}   —   {{ ev.time }}</span>
     <br>
     {% endfor %}
+    {% else %}
+    <span>You have no registered events! <a href="/events" style="color: black;">Register here!</a></span><br>
+    {% endif %}
 {% endblock %}

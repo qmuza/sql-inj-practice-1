@@ -127,14 +127,17 @@ def logout():
 def events():
     if request.method == 'POST':
         pass; #route ini sekarang baru buat display semua event, belom ada yang pake POST
-    return render_template("/events.html", user=current_user, eventlist=Events.query.all())
+    return render_template("/events.html", user=current_user, eventlist=Events.query.all(), plist=Participations.query.filter_by(user_id=current_user.id).all())
 
 @app.route("/participate", methods=['POST'])
 @login_required
 def participate():
     evid = request.form.get('id')
     evqu = request.form.get('quant')
-    if not evid or not evqu:
+    if not evqu:
+        flash('Please Fill the desired quantity', category='danger')
+        return redirect(url_for('events'))
+    if not evid:
         flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
     part = Participations(user_id=current_user.id, event_id=int(evid), quant=int(evqu))
@@ -142,6 +145,24 @@ def participate():
     db.session.add(part)
     db.session.commit()
     flash('Event succesfully registered!', category='info')
+    return redirect(url_for('home'))
+
+@app.route("/update", methods=['POST'])
+@login_required
+def update():
+    evid = request.form.get('id')
+    evqu = request.form.get('quant')
+    if not evqu:
+        flash('Please Fill the desired quantity', category='danger')
+        return redirect(url_for('events'))
+    if not evid:
+        flash('There\'s a problem with selecting that event', category='warning')
+        return redirect(url_for('home'))
+    part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
+    Events.query.filter_by(id=int(evid)).first().registered += (int(evqu)-part.quant)
+    part.quant = int(evqu)
+    db.session.commit()
+    flash('Event succesfully updated!', category='info')
     return redirect(url_for('home'))
 
 @app.route("/cancel", methods=['POST'])
