@@ -33,6 +33,7 @@ class Participations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    quant = db.Column(db.Integer)
 
 with app.app_context():
     db.create_all()
@@ -46,8 +47,9 @@ def load_user(id):
     return Users.query.get(int(id))
 
 @app.route("/")
-@login_required
 def home():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
     if not Events.query.all():
         #kalau belom ada event apa2, tambahin bbrp event custom
         ev = [Events(name='TechFest 2024' , desc='A technology conference bringing together industry leaders, innovators, and enthusiasts to explore the latest advancements in technology. Expect keynote speeches, workshops, and networking opportunities.' , time=datetime(2024, 2, 27, 13, 0, 0) , capacity=85), 
@@ -105,6 +107,7 @@ def login():
             if check_password_hash(uname.password, password):
                 login_user(uname, remember="True")
                 flash('Succesfully logged in!', category='success')
+                return redirect(url_for('home'))
             else:
                 flash('Incorrect password', category='danger')
         else:
@@ -130,11 +133,12 @@ def events():
 @login_required
 def participate():
     evid = request.form.get('id')
-    if not evid:
+    evqu = request.form.get('quant')
+    if not evid or not evqu:
         flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
-    part = Participations(user_id=current_user.id, event_id=int(evid))
-    Events.query.filter_by(id=int(evid)).first().registered += 1
+    part = Participations(user_id=current_user.id, event_id=int(evid), quant=int(evqu))
+    Events.query.filter_by(id=int(evid)).first().registered += int(evqu)
     db.session.add(part)
     db.session.commit()
     flash('Event succesfully registered!', category='info')
@@ -147,8 +151,8 @@ def cancel():
     if not evid:
         flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
-    Events.query.filter_by(id=int(evid)).first().registered -= 1
     part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
+    Events.query.filter_by(id=int(evid)).first().registered -= part.quant
     db.session.delete(part)
     db.session.commit()
     flash('Event succesfully cancelled!', category='info')

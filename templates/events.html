@@ -9,6 +9,7 @@
             <span>Kuota: {{ event.capacity }}, </span>
             <span>Terisi: {{ event.registered }}, </span>
             <span>Tersedia: {{ event.capacity - event.registered }}.</span>
+            <br><br>
             {% if user in event.users %}
             <form action="/cancel" method="post">
                 <input type="hidden" name="id" value="{{ event.id }}">
@@ -17,6 +18,9 @@
             {% else %}
             <form action="/participate" method="post">
                 <input type="hidden" name="id" value="{{ event.id }}">
+                <label for="quant">Select number of slots to register: </label><br><br>
+                <input class="form-control mx-auto w-auto" type="number" id="quant" name="quant" min="1" max="{{ event.capacity - event.registered }}">
+                <br>
                 <button class="btn btn-primary" type="submit">Register Event</button>
             </form>
             {% endif %}
