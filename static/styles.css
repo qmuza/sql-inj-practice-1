@@ -1,0 +1,30 @@
+.ver {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+    padding: 15px;
+}
+
+.hor {
+    display: flex;
+    flex-direction: row;
+    padding: 15px;
+}
+
+.infhor {
+    gap: 10px;
+}
+
+.infver {
+    width: 80%;
+    border-right: 2px solid black;
+}
+
+.mainver {
+    gap: 50px;
+}
+
+.actver {
+    width: 20%;
+}

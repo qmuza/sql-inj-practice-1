@@ -109,9 +109,9 @@ def login():
                 flash('Succesfully logged in!', category='success')
                 return redirect(url_for('home'))
             else:
-                flash('Incorrect password', category='danger')
+                flash('Incorrect password.', category='danger')
         else:
-            flash('User not found', category='danger')
+            flash('User not found.', category='danger')
 
     return render_template("/login.html", user=current_user)
 
@@ -133,16 +133,16 @@ def participate():
     evid = request.form.get('id')
     evqu = request.form.get('quant')
     if not evqu:
-        flash('Please fill the desired quantity', category='danger')
+        flash('Please fill the desired quantity.', category='warning')
         return redirect(url_for('events'))
     if not evid:
-        flash('There\'s a problem with selecting that event', category='warning')
+        flash('There\'s a problem with selecting that event.', category='warning')
         return redirect(url_for('home'))
     try:
         evid=int(evid)
         evqu=int(evqu)
     except:
-        flash('Please enter an integer', category='danger')
+        flash('Please enter an integer.', category='danger')
         return redirect(url_for('events'))
     part = Participations(user_id=current_user.id, event_id=evid, quant=evqu)
     Events.query.filter_by(id=evid).first().registered += evqu
@@ -157,16 +157,16 @@ def update():
     evid = request.form.get('id')
     evqu = request.form.get('quant')
     if not evqu:
-        flash('Please Fill the desired quantity', category='danger')
+        flash('Please Fill the desired quantity.', category='warning')
         return redirect(url_for('events'))
     if not evid:
-        flash('There\'s a problem with selecting that event', category='warning')
+        flash('There\'s a problem with selecting that event.', category='warning')
         return redirect(url_for('home'))
     try:
         evid=int(evid)
         evqu=int(evqu)
     except:
-        flash('Please enter an integer', category='danger')
+        flash('Please enter an integer.', category='danger')
         return redirect(url_for('events'))
     part = Participations.query.filter_by(user_id=current_user.id, event_id=evid).first()
     Events.query.filter_by(id=evid).first().registered += (evqu - part.quant)
@@ -180,7 +180,7 @@ def update():
 def cancel():
     evid = request.form.get('id')
     if not evid:
-        flash('There\'s a problem with selecting that event', category='warning')
+        flash('There\'s a problem with selecting that event.', category='warning')
         return redirect(url_for('home'))
     part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
     Events.query.filter_by(id=int(evid)).first().registered -= part.quant

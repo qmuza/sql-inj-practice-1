@@ -1,41 +1,50 @@
 {% extends "base.html" %}
 
 {% block main %}
+    <div class="ver mainver">
     {% for event in eventlist %}
-        <div>
-            <h3>{{ event.name }}</h3>
-            <h5>{{ event.time }}</h5>
-            <p>{{ event.desc }}</p>
-            <span>Capacity: {{ event.capacity }}, </span>
-            <span>Registered: {{ event.registered }}, </span>
-            <span>Available: {{ event.capacity - event.registered }}.</span>
-            <br><br>
-            {% if user in event.users %}
-            {% for p in plist %}
-            {% if p.event_id == event.id %}
-            <span>You registered for {{ p.quant }} people.</span><br><br>
-            <form action="/update" method="post">
-                <input type="hidden" name="id" value="{{ event.id }}">
-                <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered + p.quant }}">
+        <div class="hor" style="width: 100%;">
+            <div class="ver infver">
+                <h3>{{ event.name }}</h3>
+                <h5>{{ event.time }}</h5>
+                <p>{{ event.desc }}</p>
+                <div class="hor infhor">
+                    <span>Capacity: {{ event.capacity }}, </span>
+                    <span>Registered: {{ event.registered }}, </span>
+                    <span>Available: {{ event.capacity - event.registered }}.</span>
+                </div>
+                <br><br>
+            </div>
+            <div class="ver actver">
+                {% if user in event.users %}
+                {% for p in plist %}
+                {% if p.event_id == event.id %}
+                <span>You registered for {{ p.quant }} people.</span><br>
+                <form action="/update" method="post">
+                    <input type="hidden" name="id" value="{{ event.id }}">
+                    <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered + p.quant }}">
+                    <br>
+                    <button class="btn btn-primary" type="submit">Change number registered</button>
+                </form>
+                {% endif %}
+                {% endfor %}
                 <br>
-                <button class="btn btn-primary" type="submit">Change number registered</button>
-            </form>
-            {% endif %}
-            {% endfor %}
-            <br>
-            <form action="/cancel" method="post">
-                <input type="hidden" name="id" value="{{ event.id }}">
-                <button class="btn btn-primary" type="submit">Cancel Event</button>
-            </form>
-            {% else %}
-            <form action="/participate" method="post">
-                <input type="hidden" name="id" value="{{ event.id }}">
-                <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered }}">
-                <br>
-                <button class="btn btn-primary" type="submit">Register Event</button>
-            </form>
-            {% endif %}
+                <form action="/cancel" method="post">
+                    <input type="hidden" name="id" value="{{ event.id }}">
+                    <button class="btn btn-primary" type="submit">Cancel Event</button>
+                </form>
+                {% else %}
+                <span>You didn't register for this event.</span><br>
+                <form action="/participate" method="post">
+                    <input type="hidden" name="id" value="{{ event.id }}">
+                    <input class="form-control mx-auto w-auto" type="number" placeholder="quantity" name="quant" min="1" max="{{ event.capacity - event.registered }}">
+                    <br>
+                    <button class="btn btn-primary" type="submit">Register Event</button>
+                </form>
+                {% endif %}
+            </div>
             <br><br><br>
         </div>  
     {% endfor %}
+    </div>
 {% endblock %}
