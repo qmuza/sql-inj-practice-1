@@ -57,7 +57,7 @@ def home():
               Events(name='Global Food Fair' , desc='A culinary event celebrating diverse cuisines from around the globe. Food stalls will offer dishes from different countries, cooking demonstrations, and cultural performances.' , time=datetime(2024, 3, 8, 11, 0, 0) , capacity=160), 
               Events(name='Green Marathon' , desc='A charity run promoting environmental awareness and sustainability. Participants can join various categories, and proceeds will go towards supporting environmental conservation projects.' , time=datetime(2024, 2, 29, 8, 0, 0) , capacity=75), 
               Events(name='Jazz Under the Stars' , desc='An outdoor jazz concert featuring renowned jazz musicians and bands. Enjoy a night of great music under the starlit sky, with food and drinks available for purchase.' , time=datetime(2024, 3, 11, 19, 0, 0) , capacity=195)]
-        #fun fact, nama + deskripsi event2 ini aku bikin pake copilot (ga sempet ngarang sendiri cuy)
+        #fun fact, contoh nama + deskripsi event2 ini aku bikin pake copilot (ga sempet ngarang sendiri cuy)
         for e in ev:
             db.session.add(e)
         db.session.commit()
@@ -122,11 +122,9 @@ def logout():
     flash('Succesfully logged out!', category='info')
     return redirect(url_for('login'))
 
-@app.route("/events", methods=['GET', 'POST'])
+@app.route("/events")
 @login_required
 def events():
-    if request.method == 'POST':
-        pass; #route ini sekarang baru buat display semua event, belom ada yang pake POST
     return render_template("/events.html", user=current_user, eventlist=Events.query.all(), plist=Participations.query.filter_by(user_id=current_user.id).all())
 
 @app.route("/participate", methods=['POST'])
@@ -135,13 +133,19 @@ def participate():
     evid = request.form.get('id')
     evqu = request.form.get('quant')
     if not evqu:
-        flash('Please Fill the desired quantity', category='danger')
+        flash('Please fill the desired quantity', category='danger')
         return redirect(url_for('events'))
     if not evid:
         flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
-    part = Participations(user_id=current_user.id, event_id=int(evid), quant=int(evqu))
-    Events.query.filter_by(id=int(evid)).first().registered += int(evqu)
+    try:
+        evid=int(evid)
+        evqu=int(evqu)
+    except:
+        flash('Please enter an integer', category='danger')
+        return redirect(url_for('events'))
+    part = Participations(user_id=current_user.id, event_id=evid, quant=evqu)
+    Events.query.filter_by(id=evid).first().registered += evqu
     db.session.add(part)
     db.session.commit()
     flash('Event succesfully registered!', category='info')
@@ -158,9 +162,15 @@ def update():
     if not evid:
         flash('There\'s a problem with selecting that event', category='warning')
         return redirect(url_for('home'))
-    part = Participations.query.filter_by(user_id=current_user.id, event_id=int(evid)).first()
-    Events.query.filter_by(id=int(evid)).first().registered += (int(evqu)-part.quant)
-    part.quant = int(evqu)
+    try:
+        evid=int(evid)
+        evqu=int(evqu)
+    except:
+        flash('Please enter an integer', category='danger')
+        return redirect(url_for('events'))
+    part = Participations.query.filter_by(user_id=current_user.id, event_id=evid).first()
+    Events.query.filter_by(id=evid).first().registered += (evqu - part.quant)
+    part.quant = evqu
     db.session.commit()
     flash('Event succesfully updated!', category='info')
     return redirect(url_for('home'))
